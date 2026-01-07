@@ -1,40 +1,105 @@
 #include <Arduino.h>
+#include <SD.h>
+#include <Audio.h>
 
-#define NUM_TRACKS 9
+// SD Card pins
+#define SD_CS 5
 
-// ESP32 pins wired to GPD2846A IO1–IO9
-const int gpdPins[NUM_TRACKS] = { 13, 12, 14, 27, 26, 25, 33, 32, 23 };
+// Button pins
+const int buttonPins[9] = {12, 13, 14, 15, 16, 17, 21, 22, 32};
 
-// Button inputs (you can change these as needed)
-const int buttonPins[NUM_TRACKS] = { 4, 5, 18, 19, 21, 22, 34, 35, 36 };
+// Audio object
+Audio audio;
 
-int lastButtonState[NUM_TRACKS] = {HIGH};
+// Sound file names on SD card
+const char* soundFiles[9] = {
+  "/sound1.mp3",
+  "/sound2.mp3",
+  "/sound3.mp3",
+  "/sound4.mp3",
+  "/sound5.mp3",
+  "/sound6.mp3",
+  "/sound7.mp3",
+  "/sound8.mp3",
+  "/sound9.mp3"
+};
+
+// Button state tracking
+bool lastButtonState[9] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
+bool buttonState[9] = {LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW, LOW};
+unsigned long lastDebounceTime[9] = {0};
+const unsigned long debounceDelay = 50;
 
 void setup() {
   Serial.begin(115200);
-
-  for (int i = 0; i < NUM_TRACKS; i++) {
-    pinMode(gpdPins[i], OUTPUT);
-    digitalWrite(gpdPins[i], HIGH); // keep HIGH when idle
-    pinMode(buttonPins[i], INPUT_PULLUP);
+  
+  // Initialize button pins
+  for (int i = 0; i < 9; i++) {
+    pinMode(buttonPins[i], INPUT_PULLDOWN);
   }
-
-  Serial.println("Ready - press a button to play track");
+  
+  // Initialize SD card
+  SPI.begin();
+  if (!SD.begin(SD_CS)) {
+    Serial.println("SD Card initialization failed!");
+    while (1);
+  }
+  Serial.println("SD Card initialized successfully");
+  
+  // Initialize audio with I2S pins
+  audio.setPinout(26, 25, 27);  // BCLK, LRC, DIN
+  audio.setVolume(15);  // Volume 0-21
+  
+  Serial.println("ESP32 Soundboard Ready!");
+  Serial.println("Press any button to play a sound");
 }
 
 void loop() {
-  for (int i = 0; i < NUM_TRACKS; i++) {
-    int state = digitalRead(buttonPins[i]);
-
-    if (lastButtonState[i] == HIGH && state == LOW) {  // button press
-      Serial.printf("Button %d pressed -> Trigger MP3 %d\n", i+1, i+1);
-
-      digitalWrite(gpdPins[i], LOW);
-      delay(100); // short pulse
-      digitalWrite(gpdPins[i], HIGH);
-
-      delay(200); // debounce
+  audio.loop();  // Keep audio processing
+  
+  // Check each button
+  for (int i = 0; i < 9; i++) {
+    int reading = digitalRead(buttonPins[i]);
+    
+    // Debounce logic
+    if (reading != lastButtonState[i]) {
+      lastDebounceTime[i] = millis();
     }
-    lastButtonState[i] = state;
+    
+    if ((millis() - lastDebounceTime[i]) > debounceDelay) {
+      if (reading != buttonState[i]) {
+        buttonState[i] = reading;
+        
+        // Button pressed (LOW to HIGH transition)
+        if (buttonState[i] == HIGH) {
+          Serial.print("Button ");
+          Serial.print(i + 1);
+          Serial.println(" pressed");
+          
+          // Stop current sound and play new one
+          audio.stopSong();
+          
+          if (audio.connecttoSD(soundFiles[i])) {
+            Serial.print("Playing: ");
+            Serial.println(soundFiles[i]);
+          } else {
+            Serial.print("Error playing: ");
+            Serial.println(soundFiles[i]);
+          }
+        }
+      }
+    }
+    
+    lastButtonState[i] = reading;
   }
+}
+
+// Optional: Audio status callbacks
+void audio_info(const char *info){
+  Serial.print("audio_info: ");
+  Serial.println(info);
+}
+
+void audio_eof_mp3(const char *info){
+  Serial.println("End of file");
 }
