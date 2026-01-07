@@ -20,7 +20,7 @@ Hardware Requirements
 - GND → GND
 
 **Buttons (with pull-down resistors):**
-- Button 1-9 → GPIO 12, 13, 14, 15, 16, 17, 21, 22, 25
+Buttons 1-9 → GPIO 12, 13, 14, 15, 16, 17, 21, 22, 33
 
 **Audio Output (I2S DAC like MAX98357A):**
 - BCLK → GPIO 26
