@@ -27,7 +27,7 @@ Hardware Requirements
 - LRC → GPIO 25
 - DIN → GPIO 27
 
-## Arduino Code## Installation Steps
+## Arduino Code Installation Steps
 
 1. **Install Arduino IDE** and add ESP32 board support
 2. **Install the ESP32-audioI2S library** by Schreibfaul1:
