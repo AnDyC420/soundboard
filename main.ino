@@ -6,8 +6,7 @@
 #define SD_CS 5
 
 // Button pins
-const int buttonPins[9] = {12, 13, 14, 15, 16, 17, 21, 22, 32};
-
+const int buttonPins[9] = {12, 13, 14, 15, 16, 17, 21, 22, 33};
 // Audio object
 Audio audio;
 
