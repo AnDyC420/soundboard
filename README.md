@@ -7,7 +7,7 @@ Hardware Requirements
 - **Speaker** (4-8 ohms)
 - **MicroSD card** (formatted as FAT32)
 - **Resistors** (10kΩ for pull-down resistors on buttons)
-- **Connecting wires**
+- **Some Wire**
 
 ## Wiring Connections
 
@@ -33,6 +33,7 @@ Buttons 1-9 → GPIO 12, 13, 14, 15, 16, 17, 21, 22, 33
 2. **Install the ESP32-audioI2S library** by Schreibfaul1:
    - In Arduino IDE: Sketch → Include Library → Manage Libraries
    - Search for "ESP32-audioI2S" and install it
+   - or manually add it via zip from https://github.com/schreibfaul1/ESP32-audioI2S
 
 3. **Prepare your SD card:**
    - Format as FAT32
