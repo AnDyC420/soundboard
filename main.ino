@@ -7,6 +7,7 @@
 
 // Button pins
 const int buttonPins[9] = {12, 13, 14, 15, 16, 17, 21, 22, 33};
+
 // Audio object
 Audio audio;
 
@@ -46,7 +47,7 @@ void setup() {
   Serial.println("SD Card initialized successfully");
   
   // Initialize audio with I2S pins
-  audio.setPinout(26, 25, 27);  // BCLK, LRC, DIN
+  audio.setPinout(26, 27, 25);  // BCLK, LRC, DIN
   audio.setVolume(15);  // Volume 0-21
   
   Serial.println("ESP32 Soundboard Ready!");
@@ -78,7 +79,7 @@ void loop() {
           // Stop current sound and play new one
           audio.stopSong();
           
-          if (audio.connecttoSD(soundFiles[i])) {
+          if (audio.connecttoFS(SD, soundFiles[i])) {
             Serial.print("Playing: ");
             Serial.println(soundFiles[i]);
           } else {
